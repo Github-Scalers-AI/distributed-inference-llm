@@ -1,3 +1,9 @@
+# Created by scalers.ai for Dell
+"""
+This script builds a Gradio ChatInterface demo for interacting with a
+conversational model deployed as a REST API endpoint.
+"""
+
 import argparse
 import json
 
@@ -53,7 +59,7 @@ def send_request(message, history, tokens, temperature):
                 output = data["text"]
                 partial_message = partial_message + output
                 yield partial_message
-            except:
+            except json.JSONDecodeError:
                 data = chunk.decode("utf-8")
                 output = data
                 partial_message = partial_message + output
@@ -79,12 +85,36 @@ def build_demo():
     return demo
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="localhost")
-    parser.add_argument("--port", type=int, default=7860)
-    parser.add_argument("--url", type=str, default="http://localhost:8000/gpu")
-    args = parser.parse_args()
+def parse_arguments():
+    """Parse command-line arguments.
 
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
+    # Create ArgumentParser object
+    parser = argparse.ArgumentParser()
+
+    # Add command-line arguments
+    parser.add_argument(
+        "--host", type=str, default="localhost"
+    )  # Hostname argument
+    parser.add_argument(
+        "--port", type=int, default=7860
+    )  # Port number argument
+    parser.add_argument(
+        "--url", type=str, default="http://localhost:30800/gpu"
+    )  # URL argument
+
+    # Parse the arguments
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    # Parse command-line arguments
+    args = parse_arguments()
+
+    # Build the demo
     demo = build_demo()
+
+    # Launch the demo server
     demo.launch(server_name=args.host, server_port=args.port)

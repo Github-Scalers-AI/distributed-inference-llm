@@ -1,3 +1,5 @@
+# Created by scalers.ai for Dell
+# CPU Cluster Configuration File
 
 apiVersion: ray.io/v1
 kind: RayService
@@ -18,29 +20,37 @@ spec:
         args:
           model_name: "<Model Path>" # add model path here
           data_type: int8
+          max_new_tokens: 256
+          temperature: 1.0
+          batch_timeout: 0.1
           batch_size: 1
           hf_token: <HF_TOKEN> # add your huggingface token here
+          target_device: "INTEL"
         deployments:
-        - name: BigDLDeployment
+        - name: CPUDeployment
           num_replicas: 2
           max_concurrent_queries: 1
-          ray_actor_options: {"num_cpus": 224}
+          ray_actor_options:
+            num_cpus: 224
       - name: llama2-amd
-        import_path: inference_amd:typed_app_builder
+        import_path: inference:typed_app_builder
         route_prefix: /acpu
         args:
-          model_name: ""<Model Path>" # add model path here
+          model_name: "<Model Path>" # add model path here
           data_type: int8
           max_new_tokens: 256
           temperature: 1.0
           batch_timeout: 0.1
           batch_size: 1
           hf_token: <HF_TOKEN> # add your huggingface token here
+          target_device: "AMD"
         deployments:
-        - name: ONNXDeployment
-          num_replicas: 3
+        - name: CPUDeployment
+          num_replicas: 1
           max_concurrent_queries: 1
-          ray_actor_options: {"num_cpus": 128, "amd_cpu": 1}
+          ray_actor_options:
+            num_cpus: 128
+            amd_cpu: 1
   rayClusterConfig:
     rayVersion: '2.8.1'
     # Ray head pod template.
@@ -56,7 +66,7 @@ spec:
         spec:
           containers:
           - name: ray-cpu-head
-            image: traindell.azurecr.io/cpus:t1
+            image: infer.cr.io/cpu_intel:latest
             volumeMounts:
               - mountPath: /tmp/ray
                 name: ray-logs
@@ -92,7 +102,7 @@ spec:
           spec:
             containers:
             - name: cpu-amd
-              image: traindell.azurecr.io/cpus:t1
+              image: infer.cr.io/cpu_amd:latest
               resources:
                 limits:
                   cpu: "256"
@@ -122,7 +132,7 @@ spec:
           spec:
             containers:
             - name: cpu-intel
-              image: traindell.azurecr.io/cpus:t1
+              image: infer.cr.io/cpu_intel:latest
               resources:
                 limits:
                   cpu: "224"
@@ -189,10 +199,6 @@ spec:
     name: "dashboard"
     targetPort: 8265
     nodePort: 30266
-  - port: 6379
-    name: "test-head"
-    targetPort: 6379
-    nodePort: 30279
   - port: 8001
     name: "endpoint"
     targetPort: 8001

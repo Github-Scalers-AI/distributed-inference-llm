@@ -1,3 +1,10 @@
+# v1.0 Release
+
+## Fixes
+* Restructured the flow of user guides.
+* Improvement in technical contents.
+* Code improvements and clean up.
+
 # v0.1 Release
 
 ## Highlights

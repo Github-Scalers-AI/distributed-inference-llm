@@ -1,3 +1,14 @@
+# Created by scalers.ai for Dell
+"""
+This script defines a FastAPI application for deploying and running a
+vLLM (Very Large Language Model) engine. The application handles incoming
+requests containing text prompts, max tokens and temperature and runs
+inference on the vLLM async engine, and returns the generated text as responses.
+
+The script is modified version of doc/source/serve/doc_code/vllm_example.py
+from https://github.com/ray-project/ray/tree/master repo.
+"""
+
 import json
 import os
 from enum import Enum

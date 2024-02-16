@@ -2,7 +2,7 @@
 
 **Estimated Time: 40 mins ⏱️**
 
-This section acts as the foundation step. Learn how to configure your cluster using lightweight [K3S](https://docs.k3s.io/) on both server and agent nodes. Explore [Helm](https://helm.sh/), the package manager for Kubernetes, that helps streamline installations. Understand the intricate integration of [NVIDIA device plugins](https://github.com/NVIDIA/k8s-device-plugin).
+This section acts as the foundation step. Learn how to configure your cluster using lightweight [K3S](https://docs.k3s.io/) on both server and agent nodes. Explore [Helm](https://helm.sh/), the package manager for Kubernetes, that helps streamline installations. Understand the intricate integration of [NVIDIA® device plugins](https://github.com/NVIDIA/k8s-device-plugin) and [AMD K8S device plugin](https://github.com/ROCm/k8s-device-plugin).
 
 
 ## Table of Contents
@@ -11,8 +11,8 @@ This section acts as the foundation step. Learn how to configure your cluster us
     * [Server Node Setup](#server-node-setup)
     * [Agent Node Setup](#agent-node-setup)
 * [Installing Helm](#installing-helm)
+* [NVIDIA® Device Plugins for Kubernetes](#nvidia®-device-plugins-for-kubernetes)
 * [AMD Device Plugins for Kubernetes](#amd-device-plugins-for-kubernetes)
-* [NVIDIA Device Plugins for Kubernetes](#nvidia-device-plugins-for-kubernetes)
 * [Network File System (NFS) Setup](#network-file-system-nfs-setup)
     * [Setting up NFS Server](#setting-up-nfs-server)
     * [Creating the Kubernetes Persistent Volume and Claims for NFS](#creating-the-kubernetes-persistent-volume-and-claims-for-nfs)
@@ -20,10 +20,10 @@ This section acts as the foundation step. Learn how to configure your cluster us
         * [Create a Persistent Volume Claim](#create-a-persistent-volume-claim)
 
 
-
 ## Setting up Azure Container Registry[Optional]
 
-> *Note: You can setup a container registry of your choice.*
+> [!NOTE]
+> You can setup a container registry of your choice.
 
 Follow the below steps to setup the Azure Container Registry (ACR) on development machine.
 
@@ -36,9 +36,8 @@ Follow the below steps to setup the Azure Container Registry (ACR) on developmen
 
 ### Server Node Setup
 
-> *Note: The following setup is for the Server/Head node.*
-
-> *Note: The k3s cluster will be setup with `containerd` as runtime.*
+> [!NOTE]
+> The following setup is for the Server/Head node.
 
 Select one of the node as the Server/Head node for the K3S cluster and follow the below steps.
 
@@ -85,7 +84,8 @@ Select one of the node as the Server/Head node for the K3S cluster and follow th
 
 ### Agent Node Setup
 
-> *Note: Complete the [Server Node Setup](#server-node-setup) before starting agent node setup.*
+> [!NOTE]
+> Complete the [Server Node Setup](#server-node-setup) before starting agent node setup.
 
 Follow the below steps to add nodes to the k3s cluster as agent/worker nodes.
 
@@ -97,13 +97,14 @@ Follow the below steps to add nodes to the k3s cluster as agent/worker nodes.
     ```
     Replace the `<Ethernet Interface Name>` with selected interface.
 
-2. set the k3s server node token.
+2. Set the k3s server node token.
 
     ```sh
     export K3S_TOKEN=<Server Node Token>
     ```
     * The node token is accessible at `/var/lib/rancher/k3s/server/node-token` on your server node.
-3. set the k3s server node URL.
+
+3. Set the k3s server node URL.
     > *Note: Use the IP/Hostname of the Ethernet Interface you selected for the server/head node.*
 
     ```sh
@@ -143,42 +144,56 @@ Install the [Helm v3.12.3 or higher](https://helm.sh/) CLI on the server/head no
     helm version
     ```
 
-## AMD Device Plugins for Kubernetes
+## NVIDIA® Device Plugins for Kubernetes
 
-1. Installing AMD GPU Operator
+Once the k3s cluster is setup successfully, the NVIDIA® plugins for Kubernetes needs to be installed to provide access to NVIDIA® GPUs for the cluster pods.
 
-    ```sh
-    helm repo add amd-gpu-helm https://rocm.github.io/k8s-device-plugin/
+<details>
+<summary>Prerequisites</summary>
+Before deploying the plugin, make sure that all NVIDIA® GPU drivers are properly installed.
 
-    helm install amd-gpu amd-gpu-helm/amd-gpu --version 0.10.0
-    ```
+You can verify the GPU driver installation by running `nvidia-smi` on the server.
 
-2. Test amd gpu on k3s (using alexnet tf rocm benchmarking)
-
-    The device plugin needs to be run on all the nodes that are equipped with AMD GPU. The simplest way of doing so is to create a Kubernetes DaemonSet, which run a copy of a pod on all (or some) Nodes in the cluster. You can create a DaemonSet by directly pullinf from the web using
-
-    ```sh
-    kubectl create -f https://raw.githubusercontent.com/RadeonOpenCompute/k8s-device-plugin/master/example/pod/alexnet-gpu.yaml
-
-    kubectl logs alexnet-tf-gpu-pod
-    ```
-
-## NVIDIA Device Plugins for Kubernetes
-
-The preferred method to deploy the GPU Operator is using Helm.
-
-Add NVIDIA Helm repository.
+You should see a similar output as below for the command.
 
 ```sh
-helm repo add nvidia https://helm.ngc.nvidia.com/nvidia \
-   && helm repo update
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.86.10              Driver Version: 535.86.10    CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  | 00000000:1B:00.0 Off |                  Off |
+| N/A   33C    P0              62W / 500W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
 ```
 
-Install the NVIDIA GPU operator plugins
+</details>
 
-```sh
-helm install gpu-operator -n gpu-operator --create-namespace \
-  nvidia/gpu-operator $HELM_OPTIONS \
+
+Follow the below steps on the server/head node to setup.
+
+1. Add the NVIDIA® Helm repository.
+
+    ```sh
+    helm repo add nvidia https://helm.ngc.nvidia.com/nvidia \
+    && helm repo update
+    ```
+2. Install the NVIDIA® GPU operator plugins
+
+    ```sh
+    helm install gpu-operator -n gpu-operator --create-namespace \
+    nvidia/gpu-operator $HELM_OPTIONS \
     --set toolkit.env[0].name=CONTAINERD_CONFIG \
     --set toolkit.env[0].value=/var/lib/rancher/rke2/agent/etc/containerd/config.toml.tmpl \
     --set toolkit.env[1].name=CONTAINERD_SOCKET \
@@ -187,16 +202,108 @@ helm install gpu-operator -n gpu-operator --create-namespace \
     --set toolkit.env[2].value=nvidia \
     --set toolkit.env[3].name=CONTAINERD_SET_AS_DEFAULT \
     --set-string toolkit.env[3].value=true
-```
-> *Note: To know more about the NVIDIA GPU operator plugins, refer [NVIDIA GPU Operator Installation page](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#rancher-kubernetes-engine-2)
+    ```
+
+<details>
+<summary>Verify the NVIDIA® GPU access on nodes</summary>
+
+* List the nodes on your cluster.
+
+    ```sh
+    kubectl get nodes
+    ```
+* Get the details of the node with NVIDIA® GPU.
+
+    ```sh
+    kubectl describe nodes xe9680
+    ```
+    You should see the details of NVIDIA® GPUs under Capacity section on the output similar to the below for each nodes.
+
+    ```yaml
+    ...
+    Capacity:
+    cpu:                224
+    ephemeral-storage:  3072261880Ki
+    hugepages-1Gi:      0
+    hugepages-2Mi:      0
+    memory:             2113250420Ki
+    nvidia.com/gpu:     8 # Available GPU on the node
+    pods:               110
+    Allocatable:
+    ...
+    ```
+
+> [!NOTE]
+> This installation method is for k3s, refer  [NVIDIA® GPU Operator Installation page](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html) to know more about the NVIDIA® GPU operator plugins on Kubernetes.
+
+</details>
+
+
+## AMD Device Plugins for Kubernetes
+
+The AMD plugins for Kubernetes needs to be installed to provide access to AMD GPUs for the cluster pods.
+
+<details>
+<summary>Prerequisites</summary>
+Before deploying the plugin, make sure that all AMD GPU drivers are properly installed.
+
+You can verify the GPU driver installation by running `rocm-smi` on the server.
+</details>
+
+1. Installing AMD GPU Operator
+
+    ```sh
+    helm repo add amd-gpu-helm https://rocm.github.io/k8s-device-plugin/ && helm repo update
+    ```
+
+2. Install the AMD GPU operator plugins
+
+    ```sh
+    helm install amd-gpu amd-gpu-helm/amd-gpu --version 0.10.0
+    ```
+
+<details>
+<summary>Verify the AMD GPU access on nodes</summary>
+
+* List the nodes on your cluster.
+
+    ```sh
+    kubectl get nodes
+    ```
+* Get the details of the node with AMD GPU.
+
+    ```sh
+    kubectl describe nodes r7526
+    ```
+    You should see the details of AMD GPUs under Capacity section on the output similar to the below for each nodes.
+
+    ```yaml
+    ...
+    Capacity:
+    cpu:                224
+    ephemeral-storage:  3072261880Ki
+    hugepages-1Gi:      0
+    hugepages-2Mi:      0
+    memory:             2113250420Ki
+    amd.com/gpu:        4 # Available GPU on the node
+    pods:               110
+    Allocatable:
+    ...
+    ```
+
+> [!NOTE]
+> To know more about the AMD GPU Plugin refer [AMD ROCm™/k8s-device-plugin | Github](https://github.com/ROCm/k8s-device-plugin)
+
+</details>
 
 ## Network File System (NFS) Setup
 
 ### Setting up NFS Server
 
-> *Note: Skip this step if a NFS Server like a [Dell PowerScale devices](https://www.dell.com/en-in/work/shop/powerscale-family/sf/powerscale)  already available*
+> [!NOTE]
+> Skip this step if a NFS Server like a [Dell™ PowerScale devices](https://www.dell.com/en-in/work/shop/powerscale-family/sf/powerscale)  already available
 
-The Network File System is used to store the models for the serving. You can save the the serving start time with NFS. The below steps creates a NFS server on one of your nodes.
+The Network File System is used to store the models for the serving. You can save the the serving start time with NFS. The below steps create a NFS server on one of your nodes.
 
 1. Install the nfs server
 
@@ -204,13 +311,14 @@ The Network File System is used to store the models for the serving. You can sav
     sudo apt-get update
     sudo apt-get install nfs-kernel-server
     ```
-2. Create an directory `<Directory Path>` to use as the mount directory.
+2. Create a directory `<Directory Path>` to use as the mount directory.
 3. Update the file `/etc/exports` file with directory details as root user.
 
     ```sh
     <Directory Path> *(rw,sync,no_subtree_check,no_root_squash)
     ```
-    > *Note: This provides NFS access to all machine on the network.*
+    > [!NOTE]
+    > This provides NFS access to all machine on the network.*
 
 4. Restart the nfs service to apply the changes.
 
@@ -314,3 +422,5 @@ The Network File System is used to store the models for the serving. You can sav
     NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
     nfs-pvc   Bound    nfs-pv   500Gi      RWX                           5m
     ```
+
+[Back to Deployment Guide](../README.md#deployment-guide)

@@ -1,7 +1,7 @@
 # Created by scalers.ai for Dell
-# Dockerfile for creating serving docker image for Nvidia GPU
+# Dockerfile for creating serving docker image for CPU
 
-FROM nvcr.io/nvidia/pytorch:23.10-py3
+FROM ubuntu:22.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -12,6 +12,7 @@ RUN apt-get update && \
     libreadline-dev \
     libsqlite3-dev \
     wget \
+    vim \
     curl \
     llvm \
     libncurses5-dev \
@@ -56,6 +57,8 @@ RUN apt-get purge -y \
     liblzma-dev \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY inference.py /app
+COPY inference_intel.py /app
+COPY inference_amd.py /app
+
 
 EXPOSE 8000

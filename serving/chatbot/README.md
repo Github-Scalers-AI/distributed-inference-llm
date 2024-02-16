@@ -12,7 +12,7 @@ the application endpoint for model serving.
 ## Prerequisites
 
 After the ray cluster for CPU or GPU is operational, the application URL becomes accessible.
-Refer the Ray Cluster documentation for additional information [here](../docs/raycluster_setup.md).
+Refer the Ray Cluster documentation for additional information [here](../../docs/cluster_setup.md).
 
 ## Steps To Start the Chatbot
 
@@ -56,7 +56,7 @@ by accessing the url `localhost:8000` on a browser of your choice.
 The following is a screenshot of the chatbot:
 
 ![Chatbot](../../assets/chatbot.jpg)
-<figcaption style="text-align:justify; font-style:italic;">Fig 7. Chatbot UI</figcaption>
+<figcaption style="text-align:justify; font-style:italic;">Chatbot UI</figcaption>
+<br>
 
-
-[Back to Detailed setup guide](../../README.md#detailed-set-up-guide)
+[Back to Deployment Guide](../../README.md#deployment-guide)
