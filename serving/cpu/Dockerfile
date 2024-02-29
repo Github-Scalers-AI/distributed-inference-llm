@@ -57,8 +57,6 @@ RUN apt-get purge -y \
     liblzma-dev \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY inference_intel.py /app
-COPY inference_amd.py /app
-
+COPY inference.py /app
 
 EXPOSE 8000
