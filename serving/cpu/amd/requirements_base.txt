@@ -1,2 +1,0 @@
-ray[serve]==2.8.1
-fastapi==0.104.1

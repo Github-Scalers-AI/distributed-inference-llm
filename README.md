@@ -77,11 +77,11 @@ Let's deploy the Llama 2 models on your cluster for distributed inference.
 * [Serving Llama 2 70B Chat on GPUs](./docs/serving_llm.md#serving-llama-2-70b-chat-on-gpus)
     * [Building Serving Docker Images](./docs/serving_llm.md#building-serving-docker-images)
     * [Deployment Configuration](./docs/serving_llm.md#deployment-configuration)
-    * [Deploying LLama 2 7B Serving](./docs/serving_llm.md#deploying-llama-2-70b-serving)
+    * [Deploying LLama 2 70B Serving](./docs/serving_llm.md#deploying-llama-2-70b-serving)
 * [Serving Llama 2 7B Chat on CPUs](./docs/serving_llm.md#serving-llama-2-7b-chat-on-cpus)
     * [Building Serving Docker Images](./docs/serving_llm.md#building-serving-docker-images-1)
     * [Deployment Configuration](./docs/serving_llm.md#deployment-configuration-1)
-    * [Deploying Ray Cluster](./docs/serving_llm.md#deploying-llama-2-7b-serving)
+    * [Deploying LLama 2 7B Serving](./docs/serving_llm.md#deploying-llama-2-7b-serving)
 
 ## 4. Monitoring Cluster and Serving
 
